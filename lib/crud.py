@@ -1,15 +1,15 @@
 # crud.py
 
 from db_connect import session, Recipe, Ingredient
-from recipe import Recipe as RecipeClass
 
 # Function to add a new recipe
 def add_recipe(name, ingredients, instructions):
-    new_recipe = Recipe(name=name, instructions=instructions)
+    
+    new_recipe = Recipe(name=name.strip(), instructions=instructions)
     
     # Add ingredients to the recipe
     for ingredient in ingredients:
-        new_ingredient = Ingredient(ingredient_name=ingredient, recipe=new_recipe)
+        new_ingredient = Ingredient(ingredient_name=ingredient.strip().lower(), recipe=new_recipe)
         session.add(new_ingredient)
     
     # Save the recipe and ingredients to the database
@@ -24,6 +24,11 @@ def edit_recipe(recipe_id, new_name=None, new_ingredients=None, new_instructions
     if not recipe:
         print(f"Recipe with ID {recipe_id} not found.")
         return
+    
+    new_name = input("Enter new recipe name (or press Enter to keep current): ")
+    new_ingredients = input("Enter new ingredients (comma separated, or press Enter to keep current): ")
+    new_instructions = input("Enter new instructions (or press Enter to keep current): ")
+    new_ingredients = new_ingredients.split(',') if new_ingredients else None
 
     if new_name:
         recipe.name = new_name
@@ -79,7 +84,7 @@ def view_recipe_details(recipe_id):
 
 # Function to search for recipes by name
 def search_recipe_by_name(name):
-    recipes = session.query(Recipe).filter(Recipe.name.like(f"%{name}%")).all()
+    recipes = session.query(Recipe).filter(Recipe.name.ilike(f"%{name}%")).all()
     
     if not recipes:
         print(f"No recipes found with the name '{name}'.")
